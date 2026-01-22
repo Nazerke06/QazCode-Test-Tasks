@@ -1,6 +1,5 @@
 package org.qazcodenarxoz.mainmicroservice1.websocket;
 
-import com.example.dmc1.websocket.MC1WebSocketSessionHolder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

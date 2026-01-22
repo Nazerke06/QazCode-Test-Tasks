@@ -1,8 +1,10 @@
 package org.qazcodenarxoz.mainmicroservice1.websocket;
 
-import com.example.dmc1.entity.MC1Entity;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.qazcodenarxoz.mainmicroservice1.entity.MC1Entity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -11,8 +13,11 @@ import org.springframework.web.socket.client.WebSocketConnectionManager;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.util.Objects;
+
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class MC1WebSocketClient {
 
     private final ObjectMapper objectMapper;
@@ -20,21 +25,11 @@ public class MC1WebSocketClient {
 
     @Value("${ws.uri}")
     private String WS_URI;
-//    private String WS_URI="ws://192.168.152.27:8080/ws";
 
-    public MC1WebSocketClient(
-            ObjectMapper objectMapper,
-            MC1WebSocketSessionHolder sessionHolder
-    ) {
-        this.objectMapper = objectMapper;
-        this.sessionHolder = sessionHolder;
-        connectWebSocket();
-    }
-
-    private void connectWebSocket() {
+    public void connectWebSocket() {
         TextWebSocketHandler handler = new TextWebSocketHandler() {
             @Override
-            public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+            public void afterConnectionEstablished(WebSocketSession session) {
                 log.info("✅ WebSocket connected to {}", WS_URI);
                 sessionHolder.setSession(session);
             }

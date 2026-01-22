@@ -1,38 +1,43 @@
 package org.qazcodenarxoz.mainmicroservice1.service.impl;
 
-import com.example.dmc1.entity.MC1Entity;
-import com.example.dmc1.service.MC1Service;
-import com.example.dmc1.websocket.MC1WebSocketClient;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.qazcodenarxoz.mainmicroservice1.websocket.MC1WebSocketClient;
+import org.qazcodenarxoz.mainmicroservice1.entity.MC1Entity;
+import org.qazcodenarxoz.mainmicroservice1.service.MC1Service;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MC1ServiceImpl implements MC1Service {
 
     private final MC1WebSocketClient mc1WebSocketClient;
     private boolean running = false;
     private long startTime;
     private long messageCount;
-
-    public MC1ServiceImpl(MC1WebSocketClient mc1WebSocketClient) {
-        this.mc1WebSocketClient = mc1WebSocketClient;
-    }
+    private ScheduledExecutorService scheduler;
 
     @Override
     public synchronized String start() {
+        mc1WebSocketClient.connectWebSocket();
         if (running) {
             return "Interaction already started";
         }
         running = true;
         startTime = System.currentTimeMillis();
         messageCount = 0;
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.schedule(this::stop, 30, TimeUnit.SECONDS);
 
         try {
-            mc1WebSocketClient.sendMessageWhenReady(new MC1Entity(1, 0, Instant.now(), null, null, null));
-            incrementMessages();
+            mc1WebSocketClient.sendMessageWhenReady(new MC1Entity());
+            messageCount++;
         } catch (Exception e) {
             log.error("Failed to send WS message", e);
         }
@@ -40,6 +45,15 @@ public class MC1ServiceImpl implements MC1Service {
         log.info("Interaction started");
         return "Started";
     }
+
+    @Override
+    public String cycle(MC1Entity entity){
+        if (!running){
+            start();
+        }
+        return "Interaction ended";
+    }
+
 
 
     @Override
@@ -49,6 +63,9 @@ public class MC1ServiceImpl implements MC1Service {
         }
         running = false;
 
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
         long duration = (System.currentTimeMillis() - startTime) / 1000;
 
         log.info("Interaction finished");
@@ -57,7 +74,6 @@ public class MC1ServiceImpl implements MC1Service {
 
         return "Stopped";
     }
-
     @Override
     public boolean isRunning() {
         return running;
@@ -66,9 +82,5 @@ public class MC1ServiceImpl implements MC1Service {
     @Override
     public long getMessageCount() {
         return messageCount;
-    }
-
-    public void incrementMessages() {
-        messageCount++;
     }
 }

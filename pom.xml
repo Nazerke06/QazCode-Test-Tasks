@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.qazcodenarxoz</groupId>
-    <artifactId>main-microservice1</artifactId>
+    <artifactId>main-microservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>main-microservice1</name>
-    <description>main-microservice1</description>
+    <name>main-microservice</name>
+    <description>main-microservice</description>
     <url/>
     <licenses>
         <license/>
