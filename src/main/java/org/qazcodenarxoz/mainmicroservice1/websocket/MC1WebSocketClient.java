@@ -46,7 +46,7 @@ public class MC1WebSocketClient {
 
     public void sendMessageWhenReady(MC1Entity entity) {
         sessionHolder.onConnected()
-                .thenAcceptAsync(session -> {
+                .thenAccept(session -> {
                     try {
                         if (session.isOpen()) {
                             String json = objectMapper.writeValueAsString(entity);

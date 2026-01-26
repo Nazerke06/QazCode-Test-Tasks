@@ -27,8 +27,10 @@ public class MC1WebSocketSessionHolder {
     public CompletableFuture<WebSocketSession> onConnected() {
         return connectedFuture;
     }
-    public void setSession(WebSocketSession session) {
+    public synchronized void setSession(WebSocketSession session) {
         this.session = session;
-        connectedFuture.complete(session);
+        if (!connectedFuture.isDone()) {
+            connectedFuture.complete(session);
+        }
     }
 }
