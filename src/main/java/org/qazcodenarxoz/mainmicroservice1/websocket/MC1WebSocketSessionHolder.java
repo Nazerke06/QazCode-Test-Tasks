@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.util.concurrent.CompletableFuture;
+
 
 @Component
 @Slf4j
@@ -15,9 +17,18 @@ import org.springframework.web.socket.WebSocketSession;
 @RequiredArgsConstructor
 public class MC1WebSocketSessionHolder {
     private WebSocketSession session;
+    private final CompletableFuture<WebSocketSession> connectedFuture =
+            new CompletableFuture<>();
 
     public boolean isConnected(){
         return session != null && session.isOpen();
     }
 
+    public CompletableFuture<WebSocketSession> onConnected() {
+        return connectedFuture;
+    }
+    public void setSession(WebSocketSession session) {
+        this.session = session;
+        connectedFuture.complete(session);
+    }
 }

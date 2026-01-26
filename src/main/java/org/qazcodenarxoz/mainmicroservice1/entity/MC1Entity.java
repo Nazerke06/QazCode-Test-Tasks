@@ -13,7 +13,8 @@ import java.time.Instant;
 @Getter
 @Setter
 @Table
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class MC1Entity {
     @Id
     private Integer id;
@@ -29,6 +30,5 @@ public class MC1Entity {
 
     @JsonProperty("end_timestamp")
     private Instant endTimestamp;
-
 
 }

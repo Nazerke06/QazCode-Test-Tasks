@@ -22,9 +22,9 @@ public class MC1Controller {
     public String stop() {
         return mc1service.stop();
     }
-    @PostMapping("/message")
-    public ResponseEntity<?> cycle(@RequestBody MC1Entity entity){
-        String cycleEnded= mc1service.cycle(entity);
-        return  ResponseEntity.ok(cycleEnded);
+    @PostMapping("/receive")
+    public ResponseEntity<?> receiveFromMC3(@RequestBody MC1Entity entity){
+        mc1service.cycle(entity);
+        return ResponseEntity.ok("Message received");
     }
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.qazcodenarxoz.mainmicroservice1.websocket.MC1WebSocketClient;
 import org.qazcodenarxoz.mainmicroservice1.entity.MC1Entity;
 import org.qazcodenarxoz.mainmicroservice1.service.MC1Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -21,19 +22,29 @@ public class MC1ServiceImpl implements MC1Service {
     private boolean running = false;
     private long startTime;
     private long messageCount;
-    private ScheduledExecutorService scheduler;
+    private ScheduledExecutorService scheduler  = Executors.newSingleThreadScheduledExecutor();
+
+    @Value("${app.timer.duration-seconds}")
+    private Long DURATION_SECONDS;
+
 
     @Override
     public synchronized String start() {
-        mc1WebSocketClient.connectWebSocket();
-        if (running) {
-            return "Interaction already started";
-        }
+        scheduler.scheduleAtFixedRate(() -> {
+            if (!running) return;
+            MC1Entity entity = new MC1Entity();
+            entity.setMc1Timestamp(Instant.now());
+            try {
+                mc1WebSocketClient.sendMessageWhenReady(entity);
+                messageCount++;
+            } catch (Exception e) {
+                log.error("Failed to send WS message", e);
+            }
+        }, 0, 1, TimeUnit.SECONDS);
         running = true;
         startTime = System.currentTimeMillis();
         messageCount = 0;
-        scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.schedule(this::stop, 30, TimeUnit.SECONDS);
+        scheduler.schedule(this::stop, DURATION_SECONDS, TimeUnit.SECONDS);
 
         try {
             mc1WebSocketClient.sendMessageWhenReady(new MC1Entity());
@@ -63,9 +74,9 @@ public class MC1ServiceImpl implements MC1Service {
         }
         running = false;
 
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
+//        if (scheduler != null) {
+//            scheduler.shutdown();
+//        }
         long duration = (System.currentTimeMillis() - startTime) / 1000;
 
         log.info("Interaction finished");

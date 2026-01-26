@@ -45,25 +45,21 @@ public class MC1WebSocketClient {
     }
 
     public void sendMessageWhenReady(MC1Entity entity) {
-        new Thread(() -> {
-            while (!sessionHolder.isConnected()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-            }
-            try {
-                String json = objectMapper.writeValueAsString(entity);
-                WebSocketSession session = sessionHolder.getSession();
-                if (session != null && session.isOpen()) {
-                    session.sendMessage(new TextMessage(json));
-                    log.info("➡️ WS message sent: {}", json);
-                }
-            } catch (Exception e) {
-                log.error("Failed to send WS message", e);
-            }
-        }).start();
+        sessionHolder.onConnected()
+                .thenAcceptAsync(session -> {
+                    try {
+                        if (session.isOpen()) {
+                            String json = objectMapper.writeValueAsString(entity);
+                            session.sendMessage(new TextMessage(json));
+                            log.info("➡️ WS message sent: {}", json);
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to send WS message", e);
+                    }
+                })
+                .exceptionally(ex -> {
+                    log.error("WS connection failed", ex);
+                    return null;
+                });
     }
 }
