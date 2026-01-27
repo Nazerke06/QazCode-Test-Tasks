@@ -37,4 +37,16 @@ public class MC1Entity {
     @JsonProperty("end_timestamp")
     @Column(name = "end_timestamp")
     private Instant endTimestamp;
+
+    @Override
+    public String toString() {
+        return "MC1Entity{" +
+                "id=" + id +
+                ", sessionId=" + sessionId +
+                ", mc1Timestamp=" + mc1Timestamp +
+                ", mc2Timestamp=" + mc2Timestamp +
+                ", mc3Timestamp=" + mc3Timestamp +
+                ", endTimestamp=" + endTimestamp +
+                '}';
+    }
 }

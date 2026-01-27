@@ -74,7 +74,7 @@ public class MC1ServiceImpl implements MC1Service {
     private void finalizeAndSave(MC1Entity entity) {
         entity.setEndTimestamp(Instant.now());
         mc1Repository.save(entity);
-        log.info("📥 Message cycled and saved. ID: {}", entity.getId());
+        log.info("📥 Message cycled and saved. ID: {}", entity);
     }
 
     public void sendInternal(MC1Entity entity) {
