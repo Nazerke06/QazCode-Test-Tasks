@@ -27,7 +27,7 @@ public class MC1ServiceImpl implements MC1Service {
     private long startTime;
     private final AtomicLong messageCount = new AtomicLong(0);
     private final AtomicLong currentSessionId = new AtomicLong(0);
-    private ScheduledExecutorService scheduler=Executors.newSingleThreadScheduledExecutor();;
+    private ScheduledExecutorService scheduler=Executors.newSingleThreadScheduledExecutor();
 
     @Value("${app.timer.duration-seconds}")
     private Long DURATION_SECONDS;
@@ -58,18 +58,13 @@ public class MC1ServiceImpl implements MC1Service {
     public String cycle(MC1Entity entity) {
         if (!running) {
             log.info("Message received but system is stopped. Saving last record.");
-            finalizeAndSave(entity);
             return "Stopped";
         }
-
         finalizeAndSave(entity);
 
-        MC1Entity nextEntity = new MC1Entity(1,1,Instant.now(),null,null,null);
+        MC1Entity nextEntity = new MC1Entity();
         nextEntity.setSessionId(entity.getSessionId());
         nextEntity.setMc1Timestamp(Instant.now());
-
-        MC1Entity savedEntity = mc1Repository.save(entity);
-
         sendInternal(nextEntity);
 
         return "Cycle continued";
@@ -98,9 +93,7 @@ public class MC1ServiceImpl implements MC1Service {
         running = false;
         if (scheduler != null) {
             scheduler.shutdownNow();
-            scheduler = null;
         }
-
         long duration = (System.currentTimeMillis() - startTime) / 1000;
         log.info("=== Interaction finished ===");
         log.info("Duration: {}s", duration);
