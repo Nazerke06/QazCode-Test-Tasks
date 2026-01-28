@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.qazcodenarxoz</groupId>
-    <artifactId>main-microservice1</artifactId>
+    <artifactId>main-microservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>main-microservice1</name>
-    <description>main-microservice1</description>
+    <name>main-microservice</name>
+    <description>main-microservice</description>
     <url/>
     <licenses>
         <license/>
@@ -57,6 +57,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
         </dependency>
     </dependencies>
 
