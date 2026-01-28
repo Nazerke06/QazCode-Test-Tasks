@@ -17,14 +17,19 @@ import java.util.Objects;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class MC1WebSocketClient {
 
     private final ObjectMapper objectMapper;
     private final MC1WebSocketSessionHolder sessionHolder;
 
-    @Value("${ws.uri}")
     private String WS_URI;
+
+    public MC1WebSocketClient(ObjectMapper objectMapper, MC1WebSocketSessionHolder sessionHolder,
+                              @Value("${ws.uri}") String wsUri) {
+        this.objectMapper = objectMapper;
+        this.sessionHolder = sessionHolder;
+        WS_URI = wsUri;
+    }
 
     public void connectWebSocket() {
         TextWebSocketHandler handler = new TextWebSocketHandler() {
