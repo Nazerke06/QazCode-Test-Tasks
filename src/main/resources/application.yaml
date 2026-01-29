@@ -9,9 +9,9 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
+    url: ${MC1_DATABASE_URL}
+    username: ${MC1_DATABASE_USER}
+    password: ${MC1_DATABASE_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
@@ -23,11 +23,22 @@ spring:
 
 
 server:
-  port: ${PORT}
+  port: ${MC1_PORT}
 
 ws:
-  uri: ${WS_URI}
+  uri: ${MC1_WS_URI}
 
 app:
   timer:
-    duration-seconds: ${DURATION_SECOND}
+    duration-seconds: ${MC1_DURATION_SECOND}
+
+
+management:
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"

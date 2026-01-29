@@ -36,6 +36,7 @@ public class MC1ServiceImpl implements MC1Service {
     public  String start() {
         if (running) return "Already running";
 
+        scheduler = Executors.newSingleThreadScheduledExecutor();
         mc1WebSocketClient.connectWebSocket();
         messageCount.set(0);
         currentSessionId.incrementAndGet();
