@@ -23,7 +23,7 @@ spring:
 
 
 server:
-  port: ${MC1_PORT}
+  port: ${MC1_PORT:8000}
 
 ws:
   uri: ${MC1_WS_URI}

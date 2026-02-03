@@ -1,5 +1,6 @@
 package org.qazcodenarxoz.mainmicroservice1.service.impl;
 
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.qazcodenarxoz.mainmicroservice1.repository.MC1Repository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -27,7 +29,9 @@ public class MC1ServiceImpl implements MC1Service {
     private long startTime;
     private final AtomicLong messageCount = new AtomicLong(0);
     private final AtomicLong currentSessionId = new AtomicLong(0);
-    private ScheduledExecutorService scheduler=Executors.newSingleThreadScheduledExecutor();
+
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> scheduledTask;
 
     @Value("${app.timer.duration-seconds}")
     private Long DURATION_SECONDS;
@@ -36,7 +40,10 @@ public class MC1ServiceImpl implements MC1Service {
     public  String start() {
         if (running) return "Already running";
 
-        scheduler = Executors.newSingleThreadScheduledExecutor();
+        if (scheduledTask != null && !scheduledTask.isDone()) {
+            scheduledTask.cancel(true);
+        }
+
         mc1WebSocketClient.connectWebSocket();
         messageCount.set(0);
         currentSessionId.incrementAndGet();
@@ -49,7 +56,7 @@ public class MC1ServiceImpl implements MC1Service {
 
         sendInternal(firstEntity);
 
-        scheduler.schedule(this::stop, DURATION_SECONDS, TimeUnit.SECONDS);
+        scheduledTask = scheduler.schedule(this::stop, DURATION_SECONDS, TimeUnit.SECONDS);
 
         log.info("Interaction started. Session: {}", currentSessionId.get());
         return "Started";
@@ -92,9 +99,11 @@ public class MC1ServiceImpl implements MC1Service {
         if (!running) return "Interaction is not running";
 
         running = false;
-        if (scheduler != null) {
-            scheduler.shutdownNow();
+
+        if (scheduledTask != null) {
+            scheduledTask.cancel(false);
         }
+
         long duration = (System.currentTimeMillis() - startTime) / 1000;
         log.info("=== Interaction finished ===");
         log.info("Duration: {}s", duration);
@@ -108,4 +117,9 @@ public class MC1ServiceImpl implements MC1Service {
 
     @Override
     public AtomicLong getMessageCount() { return messageCount; }
+
+    @PreDestroy
+    public void cleanUp() {
+        scheduler.shutdown();
+    }
 }
